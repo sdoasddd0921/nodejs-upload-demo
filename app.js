@@ -21,12 +21,24 @@ function checkFolder() {
 }
 checkFolder()()
 
+function getUploads(folderPath=uploadFolder) {
+  let result = []
+  const files = fs.readdirSync(path.join(__dirname, folderPath))
+  files.forEach((val, index) => {
+    const filePath = path.join(__dirname, folderPath, val)
+    if (fs.statSync(filePath).isFile) {
+      result.push(val)
+    }
+  })
+  console.log(result)
+  return result
+}
+
 const app = new Koa()
 const uploadRoute = new Router()
 const storage = multer.diskStorage({
   destination: function(req, file, cb) {
-    console.log(file);
-    cb(null, uploadFolder);
+    cb(null, uploadFolder)
   },
   filename: function(req, file, cb) {
     const originalnames = file.originalname.split('.')
@@ -36,17 +48,24 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage })
 
-uploadRoute.post(
-  '/upload',
-  checkFolder(),
-  upload.single('test'),
-  async (ctx, next) => {
-    ctx.body = ctx.req.file
-    if (next) {
-      await next()
+uploadRoute
+  .use(checkFolder())
+  .post(
+    '/upload',
+    upload.single('test'),
+    async (ctx, next) => {
+      getUploads()
+      ctx.body = ctx.req.file
+      if (next) {
+        await next()
+      }
     }
-  }
-)
+  ).get(
+    '/getUploadedFiles',
+    async (ctx, next) => {
+      ctx.body = getUploads()
+    }
+  )
 
 app
   .use(server(path.join(__dirname, '/static')))

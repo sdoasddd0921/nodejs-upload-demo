@@ -11,16 +11,20 @@
   <input id="file" type="file">
   <button id="sub">upload</button>
 
-  <form action="http://127.0.0.1:3000/upload" method="post" enctype="multipart/form-data">  
+  <form action="/upload" method="post" enctype="multipart/form-data">  
       <input type="file" name="test"/>  
       <input type="submit" value="ok"/>  
-  </form> 
+  </form>
+  <div id="uploaded">
+    <ul id="files"></ul>
+  </div>
 
   <script>
   var btn = document.getElementById('sub');
   var fileInput = document.getElementById('file');
   sub.onclick = function() {
     aj(fileInput.files[0]);
+    fileInput.value = null;
   }
 
   function aj(file) {
@@ -30,6 +34,7 @@
     xhr.open('post', '/upload', true);
     xhr.onload = function() {
       console.log('上传完成');
+      showUploaded();
     }
     xhr.upload.onprogress = function(e) {
       if (e.lengthComputable) {
@@ -42,16 +47,38 @@
     xhr.send(fileData);
   }
 
-  function fe(file) {
-    var fileData = new FormData();
-    fileData.append("test", file);
-    fetch('/upload', {
-      method: 'post',
-      body: fileData
-    }).then(res => res.json())
-      .then(data => console.log('file upload success.'))
-      .catch(err => console.log('upload err: ', err));
+  // function fe(file) {
+  //   var fileData = new FormData();
+  //   fileData.append("test", file);
+  //   fetch('/upload', {
+  //     method: 'post',
+  //     body: fileData
+  //   }).then(res => res.json())
+  //     .then(data => {
+  //       console.log('file upload success.');
+  //     })
+  //     .catch(err => console.log('upload err: ', err));
+  // }
+
+  function showUploaded() {
+    console.log('show!')
+    var oldList = document.querySelector('#uploaded #files');
+    var newList = document.createElement('ul');
+    newList.setAttribute('id', 'files');
+    fetch('/getUploadedFiles')
+      .then(res => res.json())
+      .then(data => {
+        data.forEach(file => {
+          var listItem = document.createElement('li');
+          listItem.appendChild(document.createTextNode(file));
+          newList.appendChild(listItem);
+        });
+        console.log(oldList.parentElement)
+        oldList.parentNode.replaceChild(newList, oldList);
+      }).catch(err => console.log('show uploaded files error.'));
+
   }
+  showUploaded();
 
   </script>
 </body>
