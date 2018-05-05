@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Demo</title>
+</head>
+<body>
+  <h1>File upload demo.</h1>
+  <input id="file" type="file">
+  <button id="sub">upload</button>
+
+  <form action="http://127.0.0.1:3000/upload" method="post" enctype="multipart/form-data">  
+      <input type="file" name="test"/>  
+      <input type="submit" value="ok"/>  
+  </form> 
+
+  <script>
+  var btn = document.getElementById('sub');
+  var fileInput = document.getElementById('file');
+  sub.onclick = function() {
+    aj(fileInput.files[0]);
+  }
+
+  function aj(file) {
+    var fileData = new FormData();
+    fileData.append("test", file);
+    var xhr = new XMLHttpRequest();
+    xhr.open('post', '/upload', true);
+    xhr.onload = function() {
+      console.log('上传完成');
+    }
+    xhr.upload.onprogress = function(e) {
+      console.log('onload.onprogress')
+      if (e.lengthComputable) {
+        console.log(e.loaded/e.total)
+      } else {
+        console.log('can\'t computable')
+      }
+    }
+    xhr.send(fileData)
+  }
+
+  function fe(file) {
+    var fileData = new FormData();
+    fileData.append("test", file);
+    fetch('/upload', {
+      method: 'post',
+      body: fileData
+    }).then((res) => {
+      console.log(res);
+      // console.log(res.json())
+    })
+  }
+
+  </script>
+</body>
+</html>
