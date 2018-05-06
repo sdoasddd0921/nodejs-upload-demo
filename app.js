@@ -30,7 +30,6 @@ function getUploads(folderPath=uploadFolder) {
       result.push(val)
     }
   })
-  console.log(result)
   return result
 }
 

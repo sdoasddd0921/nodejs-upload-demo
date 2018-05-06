@@ -9,6 +9,9 @@
     display: inline-block;
     width: 43px;
   }
+  #files a {
+    margin-left: 10px;
+  }
   </style>
   <title>Demo</title>
 </head>
@@ -29,34 +32,52 @@
   <script>
   var btn = document.getElementById('sub');
   var fileInput = document.getElementById('file');
-  var progress = document.getElementById('upload-progress');
+  var uploadProgress = document.getElementById('upload-progress');
   sub.onclick = function() {
-    progress.innerText = null;
+    uploadProgress.innerText = null;
     aj(fileInput.files[0]);
     fileInput.value = null;
+  }
+
+  function ajax(url, method, data, callback, uploadProgress) {
+    var xhr = new XMLHttpRequest();
+    xhr.open(method || 'get', url, true);
+    xhr.onload = function(e) {
+      if (
+        this.status===200
+        && this.readyState===4
+        && typeof callback === 'function'
+      ) {
+        callback(JSON.parse(this.responseText));
+      }
+    }
+    if (typeof uploadProgress === 'function') {
+      xhr.upload.onprogress = uploadProgress;
+    }
+    if (typeof data === 'object') {
+      xhr.send(data);
+    } else {
+      alert('data should be an object.');
+    }
   }
 
   function aj(file) {
     var fileData = new FormData();
     fileData.append("test", file);
-    var xhr = new XMLHttpRequest();
-    xhr.open('post', '/upload', true);
-    xhr.onload = function(e) {
+    function cb(files) {
       console.log('上传完成');
-      console.log(this.responseText);
-      var files = JSON.parse(this.responseText);
       showUploaded(files);
     }
-    xhr.upload.onprogress = function(e) {
+    function progress(e) {
       if (e.lengthComputable) {
         var percent = (e.loaded / e.total * 100).toFixed(0);
-        progress.innerText = percent + '%';
+        uploadProgress.innerText = percent + '%';
         console.log('upload finished: ' + percent + '%.');
       } else {
         console.log('can\'t computable');
       }
     }
-    xhr.send(fileData);
+    ajax('/upload', 'post', fileData, cb, progress);
   }
 
   // function fe(file) {
@@ -76,22 +97,42 @@
     .then(res => res.json())
     .then(data => {
       showUploaded(data);
-    }).catch(err => console.log('show uploaded files error.'));
+    }).catch(err => console.log('show uploaded files error.\n', err));
 
   function showUploaded(files) {
-    if (!files) {
+    if (!(Array.isArray(files) && files.length > 0)) {
       return console.log('no file to show.');
     }
     var oldList = document.querySelector('#uploaded #files');
     var newList = document.createElement('ul');
     newList.setAttribute('id', 'files');
-    console.log(files)
     files.forEach(file => {
       var listItem = document.createElement('li');
-      listItem.appendChild(document.createTextNode(file));
+      listItem.setAttribute('data-row-name', file);
+      listItem.innerHTML = '<span>' + file + '</span>';
+      listItem.innerHTML += '<a href="javascript:void(0)">delete</a>';
       newList.appendChild(listItem);
     });
     oldList.parentNode.replaceChild(newList, oldList);
+  }
+
+  // delete handler
+  var fileList = document.getElementById('uploaded');
+  function deleteHandler(e) {
+    if (e.target.nodeName === 'A') {
+      var fileName = e.target.parentNode.getAttribute('data-row-name');
+      deleteFile();
+    }
+  }
+  fileList.addEventListener('click', deleteHandler, false);
+  function deleteFile(file) {
+    console.log('delete')
+    var sendData = { file: file };
+    function cb(files) {
+      console.log(e.target)
+      showUploaded(files);
+    }
+    ajax('/deleteFile', 'post', sendData, cb);
   }
 
   </script>
