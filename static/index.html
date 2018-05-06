@@ -41,9 +41,11 @@
     fileData.append("test", file);
     var xhr = new XMLHttpRequest();
     xhr.open('post', '/upload', true);
-    xhr.onload = function() {
+    xhr.onload = function(e) {
       console.log('上传完成');
-      showUploaded();
+      console.log(this.responseText);
+      var files = JSON.parse(this.responseText);
+      showUploaded(files);
     }
     xhr.upload.onprogress = function(e) {
       if (e.lengthComputable) {
@@ -70,24 +72,27 @@
   //     .catch(err => console.log('upload err: ', err));
   // }
 
-  function showUploaded() {
-    console.log('show!')
+  fetch('/getUploadedFiles')
+    .then(res => res.json())
+    .then(data => {
+      showUploaded(data);
+    }).catch(err => console.log('show uploaded files error.'));
+
+  function showUploaded(files) {
+    if (!files) {
+      return console.log('no file to show.');
+    }
     var oldList = document.querySelector('#uploaded #files');
     var newList = document.createElement('ul');
     newList.setAttribute('id', 'files');
-    fetch('/getUploadedFiles')
-      .then(res => res.json())
-      .then(data => {
-        data.forEach(file => {
-          var listItem = document.createElement('li');
-          listItem.appendChild(document.createTextNode(file));
-          newList.appendChild(listItem);
-        });
-        console.log(oldList.parentElement)
-        oldList.parentNode.replaceChild(newList, oldList);
-      }).catch(err => console.log('show uploaded files error.'));
+    console.log(files)
+    files.forEach(file => {
+      var listItem = document.createElement('li');
+      listItem.appendChild(document.createTextNode(file));
+      newList.appendChild(listItem);
+    });
+    oldList.parentNode.replaceChild(newList, oldList);
   }
-  showUploaded();
 
   </script>
 </body>

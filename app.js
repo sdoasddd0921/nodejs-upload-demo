@@ -54,8 +54,7 @@ uploadRoute
     '/upload',
     upload.single('test'),
     async (ctx, next) => {
-      getUploads()
-      ctx.body = ctx.req.file
+      ctx.body = getUploads()
       if (next) {
         await next()
       }
