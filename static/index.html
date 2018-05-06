@@ -55,7 +55,8 @@
       xhr.upload.onprogress = uploadProgress;
     }
     if (typeof data === 'object') {
-      xhr.send(data);
+      console.log(data)
+      xhr.send(JSON.stringify(data));
     } else {
       alert('data should be an object.');
     }
@@ -121,15 +122,14 @@
   function deleteHandler(e) {
     if (e.target.nodeName === 'A') {
       var fileName = e.target.parentNode.getAttribute('data-row-name');
-      deleteFile();
+      deleteFile(fileName);
     }
   }
   fileList.addEventListener('click', deleteHandler, false);
   function deleteFile(file) {
     console.log('delete')
-    var sendData = { file: file };
+    var sendData = { file: file || '' };
     function cb(files) {
-      console.log(e.target)
       showUploaded(files);
     }
     ajax('/deleteFile', 'post', sendData, cb);

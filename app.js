@@ -33,6 +33,14 @@ function getUploads(folderPath=uploadFolder) {
   return result
 }
 
+function deleteFile(file) {
+  if (fs.existsSync(path.join('./uploads/'+file))) {
+    fs.unlinkSync(path.join('./uploads/'+file))
+  } else {
+    console.log('do not have such file.')
+  }
+}
+
 const app = new Koa()
 const uploadRoute = new Router()
 const storage = multer.diskStorage({
@@ -62,6 +70,19 @@ uploadRoute
     '/getUploadedFiles',
     async (ctx, next) => {
       ctx.body = getUploads()
+    }
+  ).post(
+    '/deleteFile',
+    async (ctx, next) => {
+      const fileName = JSON.parse(ctx.request.body).file
+      if (fileName !== '') {
+        console.log(fileName)
+        deleteFile(fileName)
+      }
+      ctx.body = getUploads()
+      if (next) {
+        await next()
+      }
     }
   )
 
