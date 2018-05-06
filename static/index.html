@@ -4,12 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <style>
+  #upload-progress {
+    display: inline-block;
+    width: 43px;
+  }
+  </style>
   <title>Demo</title>
 </head>
 <body>
   <h1>File upload demo.</h1>
   <input id="file" type="file">
   <button id="sub">upload</button>
+  <span id="upload-progress"></span>
 
   <form action="/upload" method="post" enctype="multipart/form-data">  
       <input type="file" name="test"/>  
@@ -22,7 +29,9 @@
   <script>
   var btn = document.getElementById('sub');
   var fileInput = document.getElementById('file');
+  var progress = document.getElementById('upload-progress');
   sub.onclick = function() {
+    progress.innerText = null;
     aj(fileInput.files[0]);
     fileInput.value = null;
   }
@@ -38,7 +47,8 @@
     }
     xhr.upload.onprogress = function(e) {
       if (e.lengthComputable) {
-        var percent = (e.loaded / e.total * 100).toFixed(2);
+        var percent = (e.loaded / e.total * 100).toFixed(0);
+        progress.innerText = percent + '%';
         console.log('upload finished: ' + percent + '%.');
       } else {
         console.log('can\'t computable');
@@ -76,7 +86,6 @@
         console.log(oldList.parentElement)
         oldList.parentNode.replaceChild(newList, oldList);
       }).catch(err => console.log('show uploaded files error.'));
-
   }
   showUploaded();
 
