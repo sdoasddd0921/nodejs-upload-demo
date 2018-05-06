@@ -76,7 +76,6 @@ uploadRoute
     async (ctx, next) => {
       const fileName = JSON.parse(ctx.request.body).file
       if (fileName !== '') {
-        console.log(fileName)
         deleteFile(fileName)
       }
       ctx.body = getUploads()

@@ -55,8 +55,11 @@
       xhr.upload.onprogress = uploadProgress;
     }
     if (typeof data === 'object') {
-      console.log(data)
-      xhr.send(JSON.stringify(data));
+      if (data instanceof FormData) {
+        xhr.send(data);
+      } else {
+        xhr.send(JSON.stringify(data));
+      }
     } else {
       alert('data should be an object.');
     }
@@ -73,7 +76,6 @@
       if (e.lengthComputable) {
         var percent = (e.loaded / e.total * 100).toFixed(0);
         uploadProgress.innerText = percent + '%';
-        console.log('upload finished: ' + percent + '%.');
       } else {
         console.log('can\'t computable');
       }
@@ -127,7 +129,6 @@
   }
   fileList.addEventListener('click', deleteHandler, false);
   function deleteFile(file) {
-    console.log('delete')
     var sendData = { file: file || '' };
     function cb(files) {
       showUploaded(files);
