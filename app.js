@@ -61,6 +61,10 @@ uploadRoute
     '/upload',
     upload.single('test'),
     async (ctx, next) => {
+      const file = ctx.req.file
+      if (file) {
+        console.log('upload file: ', file.originalname)
+      }
       ctx.body = getUploads()
       if (next) {
         await next()
@@ -76,6 +80,7 @@ uploadRoute
     async (ctx, next) => {
       const fileName = JSON.parse(ctx.request.body).file
       if (fileName !== '') {
+        console.log('delete file: ', fileName)
         deleteFile(fileName)
       }
       ctx.body = getUploads()
